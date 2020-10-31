@@ -14,31 +14,30 @@ public class Client{
         clientSocket = new Socket(ip, port);
         out = new PrintWriter(clientSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
-        Runnable task = () -> {
-            String resp;
-            while(listener_run){
-                try{
-                    resp = in.readLine();
-                    //System.out.println(resp);
-                    if(resp.equals("fine"))
-                        System.out.println(resp);
-                } catch (IOException e){
-                    System.out.println(e);
-                }
-            }
-            Thread.currentThread().interrupt();
-        };
-
-        Thread thread = new Thread(task);
-        thread.start();
-
-
-        int a;
-        String resp = in.readLine();
-        System.out.println(resp);
         Scanner inTest = new Scanner(System.in);
-        a = inTest.nextInt();
+        String resp;
+         while(listener_run){
+            try{
+                resp = in.readLine();
+
+                if(resp.equals("fine"))
+                    System.out.println("fine");
+                   
+                if(resp.equals("input")){
+                    System.out.println("Your turn");
+                    String message;
+                    
+                    message = inTest.next();
+                    
+                    out.println("in");
+                }
+
+                
+            } catch (IOException e){
+                System.out.println(e);
+            }
+        }
+        
         inTest.close();
     }
  
