@@ -21,15 +21,16 @@ public class Client{
                 resp = in.readLine();
 
                 if(resp.equals("fine"))
-                    System.out.println("fine");
-                   
-                if(resp.equals("input")){
+                    System.out.println("fine");  
+                else if(resp.equals("input")){
                     System.out.println("Your turn");
                     String message;
                     
                     message = inTest.next();
                     
-                    out.println("in");
+                    out.println(message);
+                } else{
+                    System.out.println(resp);
                 }
 
                 
