@@ -1,13 +1,50 @@
 import java.net.*;
+import java.util.ArrayList;
 import java.io.*;
+import java.lang.reflect.Array;
+
 
 
 public class Server {
     private ServerSocket serverSocket;
-    private static boolean isGoing = true;
-    private static int turn = 0;
-    private static int num_cl = 0;
-    private static String log = "";
+    private boolean isGoing = true;
+    private int turn = 0;
+    private int num_cl = 0;
+    private String log = "";
+    private ArrayList<String> game;
+    private ArrayList<String> border;
+    private ArrayList<Integer> border_point;
+
+
+    private  int n = 3;
+    private  int m = 3;
+
+    public Server(){
+        game = new ArrayList<String>();
+        border = new ArrayList<String>();
+        border_point = new ArrayList<Integer>();
+        
+        for(int i = 0; i < n - 1; ++i){
+            border.add(i + " " + (i + 1));
+            border.add(n * (m - 1) + i + " " + (n * (m - 1) + i + 1));
+            border_point.add(i);
+            border_point.add(n * (m - 1) + i);
+        }
+        border_point.add(n - 1);
+        border_point.add(n * m  - 1);
+
+
+        for(int i = 0; i < m - 1; ++i){
+            border.add((i * n) + " " + (i * n + n));
+            border.add((i * n + n - 1) + " " + (i * n + 2 *n -1));
+            if(i != 0 && i != m - 1){
+                border_point.add(i * n);
+                border_point.add(i * n + n - 1);
+            }
+        }
+        System.out.println(border_point);
+
+    }
  
     public void start(int port) throws IOException {
         serverSocket = new ServerSocket(port);
@@ -19,7 +56,7 @@ public class Server {
         serverSocket.close();
     }
  
-    private static class EchoClientHandler extends Thread  {
+    private class EchoClientHandler extends Thread  {
         private Socket clientSocket;
         private PrintWriter out;
         private BufferedReader in;
@@ -31,94 +68,114 @@ public class Server {
         }
  
         private int Validate(int first, int second){
-            /*
-                Section - if line is already drawn 
-            */
-            
-            if(first == -1 || second == -1)
+            if(first < 0 || second < 0)
                 return 2;
+
+            int min = Integer.min(first, second);
+            int max = Integer.max(first, second);   
+
+            if(min + 1 != max && min + n != max)
+                return 2;
+
+            if(border_point.indexOf(min) != -1 && border_point.indexOf(max) != -1)
+                if(border.indexOf(min + " " + max) == -1)
+                    return 2;
+            
+            if(game.indexOf(min + " " + max) != -1)
+                return 1;
+
             return 0;
         }
 
         private void ProcedTurn(){
-            
+            if(log != ""){
+                out.println(log);
+                log = "";
+            }
+            int isInvalid = 0;
+            String resp = "";
+
+            int input_count = 0;
+
+            int[] input_i = {-1, -1};
+
+            //Parsing
+            while (isInvalid == 1 || isInvalid == 2 || input_count < 2){
+                out.println("input");
+                try{
+                    resp = in.readLine();
+                } catch (IOException e){
+                    System.out.println(e);
+                }
+                System.out.println(resp);
+                
+                try{
+                    input_i[input_count] = Integer.parseInt(resp);
+                } catch (NumberFormatException e){
+                    input_i[input_count] = -1;
+                }
+                input_count++;
+                if(input_count == 2){
+                    isInvalid = Validate(input_i[0], input_i[1]);
+                    if (isInvalid == 2){
+                        out.println("can't parse");
+                        input_count = 0;
+                    }
+                    if (isInvalid == 1){
+                        out.println("line already drawn");
+                        input_count = 0;
+                    }
+                }  
+            }
+
+            int min = Integer.min(input_i[0], input_i[1]);
+            int max = Integer.max(input_i[0], input_i[1]);
+            game.add(min + " " + max);
+
+            log += min + " " + max + "\n";
+            turn = (turn + 1)%2;
+
+
         }
 
         //  Handler main thread
-        public void run()  {
-            try{
+        public void run() {
+            
                 local_num = num_cl;
                 num_cl++;
                 System.out.println(local_num);
+            try{
                 out = new PrintWriter(clientSocket.getOutputStream(), true);
                 in = new BufferedReader(
                     new InputStreamReader(clientSocket.getInputStream()));
-                
-                
-                while (isGoing) {
-                    try{
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e){
-                        System.out.println(e);
-                    }
-                    if(local_num == turn){
-                        if(log != ""){
-                            out.println(log);
-                            log = "";
-                        }
-                        //System.out.println(local_num + " " + turn);
-                        int isInvalid = 0;
-                        String resp = "";
-
-                        int input_count = 0;
-
-                        int[] input_i = {-1, -1};
-                        //Parsing
-                        while (isInvalid == 1 || isInvalid == 2 || input_count < 2){
-                            out.println("input");
-                            resp = in.readLine();
-                            System.out.println(resp);
-                            
-                            try{
-                                input_i[input_count] = Integer.parseInt(resp);
-                            } catch (NumberFormatException e){
-                                input_i[input_count] = -1;
-                            }
-                            if(input_count == 2){
-                                isInvalid = Validate(input_i[0], input_i[1]);
-                                if (isInvalid == 2){
-                                    out.println("can't parse");
-                                    input_count = 0;
-                                }
-                                if (isInvalid == 1){
-                                    out.println("line already drawn");
-                                    input_count = 0;
-                                }
-                                
-                            }
-                            input_count++;
-                        }
-
-                        log += input_i[0] + " " + input_i[1];
-                        turn = (turn + 1)%2;
-
-
-                    } else
-                        out.println("fine");
+            } catch( IOException e){
+                System.out.println(e);
+            }
+            while (isGoing) {
+                try{
+                    Thread.sleep(2000);
+                } catch (InterruptedException er){
+                        System.out.println(er);
                 }
+                if(local_num == turn){
+                    ProcedTurn();
+                } else
+                    out.println("fine");
+            }
+            try{
                 in.close();
                 out.close();
                 clientSocket.close();
-            } catch( IOException e){
-                System.out.println(e);
-        } 
+            } catch( IOException err){
+                System.out.println(err);
+            } 
+        }
     }
-}
 
     public static void main(String[] args) throws IOException {
-        System.out.println("start");
-        Server server=new Server();
-        server.start(8080);
-        server.stop();
+            System.out.println("start");
+            Server server=new Server();
+            server.start(8080);
+            server.stop();
     }
 }

@@ -20,9 +20,7 @@ public class Client{
             try{
                 resp = in.readLine();
 
-                if(resp.equals("fine"))
-                    System.out.println("fine");  
-                else if(resp.equals("input")){
+                if(resp.equals("input")){
                     System.out.println("Your turn");
                     String message;
                     
