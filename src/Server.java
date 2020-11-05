@@ -114,7 +114,7 @@ public class Server {
                 }
 
             } else {
-                if(border.indexOf((first - 1) + " " + (second - 1)) != -1){
+                if(first % n != 0){
                     if(game.indexOf((first - 1) + " " + first) != -1 && 
                     game.indexOf((second - 1)+ " " + second) != -1 &&
                     game.indexOf((first - 1) + " " + (second - 1)) != -1){
@@ -123,7 +123,11 @@ public class Server {
                     }
                 }
 
-                if(border.indexOf((first + 1) + " " + (second + 1)) != -1){
+                if((first + 1) % n != 0){
+                    System.out.println("V+ test");
+                    System.out.println(first + " " + (first + 1));
+                    System.out.println(second + " " + (second + 1));
+                    System.out.println((first + 1) + " " + (second + 1));
                     if(game.indexOf(first + " " + (first + 1)) != -1 && 
                     game.indexOf(second + " " + (second + 1)) != -1 &&
                     game.indexOf((first + 1) + " " + (second + 1)) != -1){
@@ -182,12 +186,13 @@ public class Server {
             int min = Integer.min(input_i[0], input_i[1]);
             int max = Integer.max(input_i[0], input_i[1]);
             game.add(min + " " + max);
+            System.out.println(game);
 
             log += min + " " + max + "\n";
 
             if(isSquare(min, max) == true){
                 log +=  "player " + local_num + " got 1 point\n";
-                out.println("You got point");
+                out.println("You got a point");
                 report = false;
                 win_point++;
 
