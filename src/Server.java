@@ -70,19 +70,23 @@ public class Server {
         }
  
         private int Validate(int first, int second){
+            //Parse error
             if(first < 0 || second < 0)
                 return 2;
 
             int min = Integer.min(first, second);
             int max = Integer.max(first, second);   
 
+            //!(horizontal || vertical) detection
             if(min + 1 != max && min + n != max)
                 return 2;
 
+            //Cross border detection
             if(border_point.indexOf(min) != -1 && border_point.indexOf(max) != -1)
                 if(border.indexOf(min + " " + max) == -1)
                     return 2;
             
+            //Duplicate detection
             if(game.indexOf(min + " " + max) != -1)
                 return 1;
 
@@ -94,6 +98,7 @@ public class Server {
 
             if(placment == true)
             {
+                //horizontal detection
                 if(first - n >= 0 && second - n >= 0){
                     if(game.indexOf((first - n) + " " + first) != -1 && 
                     game.indexOf((second - n) + " " + second) != -1 &&
@@ -114,6 +119,7 @@ public class Server {
                 }
 
             } else {
+                //vertical detection
                 if(first % n != 0){
                     if(game.indexOf((first - 1) + " " + first) != -1 && 
                     game.indexOf((second - 1)+ " " + second) != -1 &&
@@ -124,10 +130,6 @@ public class Server {
                 }
 
                 if((first + 1) % n != 0){
-                    System.out.println("V+ test");
-                    System.out.println(first + " " + (first + 1));
-                    System.out.println(second + " " + (second + 1));
-                    System.out.println((first + 1) + " " + (second + 1));
                     if(game.indexOf(first + " " + (first + 1)) != -1 && 
                     game.indexOf(second + " " + (second + 1)) != -1 &&
                     game.indexOf((first + 1) + " " + (second + 1)) != -1){
