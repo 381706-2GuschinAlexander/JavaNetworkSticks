@@ -20,13 +20,17 @@ public class Client{
             try{
                 resp = in.readLine();
 
-                if(resp.equals("input")){
+                if(resp.equals("fine")){
+                    continue;
+                } else if(resp.equals("input")){
                     System.out.println("Your turn");
                     String message;
                     
                     message = inTest.next();
                     
                     out.println(message);
+                } else if(resp.equals("quit")){
+                    listener_run = false;
                 } else{
                     System.out.println(resp);
                 }

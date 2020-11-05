@@ -1,7 +1,7 @@
 import java.net.*;
 import java.util.ArrayList;
 import java.io.*;
-import java.lang.reflect.Array;
+
 
 
 
@@ -48,7 +48,7 @@ public class Server {
  
     public void start(int port) throws IOException {
         serverSocket = new ServerSocket(port);
-        while (true)
+        while (isGoing)
             new EchoClientHandler(serverSocket.accept()).start();
     }
  
@@ -61,7 +61,9 @@ public class Server {
         private PrintWriter out;
         private BufferedReader in;
         private int local_num = -1;
-
+        private boolean report = true;
+        private int win_point = 0;
+        private boolean isWinning = false;
  
         public EchoClientHandler(Socket socket) {
             this.clientSocket = socket;
@@ -87,8 +89,57 @@ public class Server {
             return 0;
         }
 
+        private boolean isSquare(int first, int second){
+            boolean placment = (first + 1 == second ? true : false);
+
+            if(placment == true)
+            {
+                if(first - n >= 0 && second - n >= 0){
+                    if(game.indexOf((first - n) + " " + first) != -1 && 
+                    game.indexOf((second - n) + " " + second) != -1 &&
+                    game.indexOf((first - n) + " " + (second - n)) != -1){
+                        System.out.println("H-");
+                        return true;
+                        
+                    }
+                }
+
+                if(first + n < n * m && second + n < n * m){
+                    if(game.indexOf(first + " " + (first + n)) != -1 && 
+                    game.indexOf(second + " " + (second + n)) != -1 &&
+                    game.indexOf((first + n) + " " + (second + n)) != -1){
+                        System.out.println("H+");
+                        return true;
+                    }
+                }
+
+            } else {
+                if(border.indexOf((first - 1) + " " + (second - 1)) != -1){
+                    if(game.indexOf((first - 1) + " " + first) != -1 && 
+                    game.indexOf((second - 1)+ " " + second) != -1 &&
+                    game.indexOf((first - 1) + " " + (second - 1)) != -1){
+                        System.out.println("V-");
+                        return true;
+                    }
+                }
+
+                if(border.indexOf((first + 1) + " " + (second + 1)) != -1){
+                    if(game.indexOf(first + " " + (first + 1)) != -1 && 
+                    game.indexOf(second + " " + (second + 1)) != -1 &&
+                    game.indexOf((first + 1) + " " + (second + 1)) != -1){
+                        System.out.println("V+");
+                        return true;
+                    }
+                }
+            }
+
+            
+            return false;
+        }
+
+
         private void ProcedTurn(){
-            if(log != ""){
+            if(log != "" && report == true){
                 out.println(log);
                 log = "";
             }
@@ -133,8 +184,22 @@ public class Server {
             game.add(min + " " + max);
 
             log += min + " " + max + "\n";
-            turn = (turn + 1)%2;
 
+            if(isSquare(min, max) == true){
+                log +=  "player " + local_num + " got 1 point\n";
+                out.println("You got point");
+                report = false;
+                win_point++;
+
+                if(win_point > (n - 1)*(m - 1) / 2)
+                {
+                    isWinning = true;
+                    isGoing = false;
+                }
+            }else{
+                turn = (turn + 1)%2;
+                report = true;
+            }
 
         }
 
@@ -162,6 +227,15 @@ public class Server {
                 } else
                     out.println("fine");
             }
+
+            if(isWinning == true){
+                out.println("you win");
+                out.println("quit");
+            } else {
+                out.println("you lost");
+                out.println("quit");
+            }
+
             try{
                 in.close();
                 out.close();
