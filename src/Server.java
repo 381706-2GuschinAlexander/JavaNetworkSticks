@@ -164,8 +164,12 @@ public class Server {
                 } catch (IOException e){
                     System.out.println(e);
                 }
-                System.out.println(resp);
-                
+                System.out.println("Local num: " + local_num + " Response: " + resp);
+                if(resp.equals("table")){
+                    out.println("table");
+                    out.println(game);
+                    continue;
+                }
                 try{
                     input_i[input_count] = Integer.parseInt(resp);
                 } catch (NumberFormatException e){

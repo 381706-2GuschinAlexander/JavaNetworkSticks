@@ -1,6 +1,8 @@
 import java.net.*;
 import java.io.*;
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Client{
     private Socket clientSocket;
@@ -29,6 +31,11 @@ public class Client{
                     message = inTest.next();
                     
                     out.println(message);
+                } else if(resp.equals("table")){
+                    String table = in.readLine();
+                    ArrayList<String> A = new ArrayList<String>(Arrays.asList(table));
+                    System.out.println(table);
+                    System.out.println(A);
                 } else if(resp.equals("quit")){
                     listener_run = false;
                 } else{
