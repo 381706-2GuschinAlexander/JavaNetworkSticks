@@ -1,3 +1,4 @@
 bin
 server.bat
 server_client_compile.bat
+.vs
