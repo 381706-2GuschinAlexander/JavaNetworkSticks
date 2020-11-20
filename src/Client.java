@@ -2,10 +2,6 @@ import java.net.*;
 import java.io.*;
 import java.util.Scanner;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
-
 public class Client {
     private Socket clientSocket;
     private PrintWriter out;
@@ -38,15 +34,11 @@ public class Client {
         String[] t_arr= eParse(table, 1);
         String[] sq_arr = eParse(sqP, 0);
 
-        
-
-
         int sq[] = new int[n * m];
         for(int i = 0; i < n * m; ++i) {
             sq[i] = Integer.parseInt(sq_arr[i]);
         }
 
-        
         char matrix[][] = new char[n + n - 1][m + m - 1];
         for(int i = 0; i < n + n - 1; ++i){
             for(int j = 0; j < m + m - 1; ++j){
@@ -55,15 +47,10 @@ public class Client {
                 else
                     matrix[i][j] = ' ';
             }
-
         }
-        
         
         for(int i = 0; i < t_arr.length && t_arr[i] != ""; ++i){
             String cor_str[] = t_arr[i].split(" ");
-            //System.out.println(t_arr[i]);
-            
-
             int k = 0; 
             if(cor_str[0].equals(""))
                 k = 1;
@@ -72,9 +59,16 @@ public class Client {
                 matrix[2 * (cor[0]/m)][2 * (cor[0] % m) + 1] = '-';
             } else{
                 matrix[2 * (cor[0]/m) + 1][2 * (cor[0] % m)] = '|';
-            }
-            
+            }   
         } 
+
+        for(int i = 0; i < sq_arr.length; ++i){
+            int tmp = Integer.parseInt(sq_arr[i]);
+            if(tmp == 0)
+                matrix[2 * (i/m) + 1][2 * (i % m) + 1] = '0';
+            else if(tmp == 1)
+                matrix[2 * (i/m) + 1][2 * (i % m) + 1] = '1';
+        }
 
         for(int i = 0; i < n + n - 1; ++i){
             for(int j = 0; j < m + m - 1; ++j){
@@ -94,14 +88,10 @@ public class Client {
             try {
                 resp = in.readLine();
 
-                if (resp.equals("fine")) {
-                    continue;
-                } else if (resp.equals("input")) {
+                if (resp.equals("input")) {
                     System.out.println("Your turn");
                     String message;
-
                     message = inTest.next();
-
                     out.println(message);
                 } else if (resp.equals("table")) {
                     Visual();
@@ -127,10 +117,10 @@ public class Client {
     }
 
     public static void main(String[] args) throws IOException {
-        System.out.println("start client");
+        System.out.println("Start client");
         Client client = new Client();
         client.startConnection("127.0.0.1", 8080);
-        System.out.println("client finished");
+        System.out.println("Client finished");
         client.stopConnection();
     }
 }
