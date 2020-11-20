@@ -43,7 +43,6 @@ public class Server {
             }
         }
         System.out.println(border_point);
-
     }
  
     public void start(int port) throws IOException {
@@ -167,7 +166,8 @@ public class Server {
                 System.out.println("Local num: " + local_num + " Response: " + resp);
                 if(resp.equals("table")){
                     out.println("table");
-                    out.println(game);
+                    out.println("All line: "+ game);
+                    out.println("You got "+ win_point + (win_point == 1 ? " point" : " points"));
                     continue;
                 }
                 try{
@@ -202,12 +202,16 @@ public class Server {
                 report = false;
                 win_point++;
 
-                if(win_point > (n - 1)*(m - 1) / 2)
-                {
+                if(win_point > (n - 1)*(m - 1) / 2){
                     isWinning = true;
                     isGoing = false;
                 }
-            }else{
+
+                if(game.size() == (n - 1) * (m - 1)){
+                    isGoing = false;
+                }
+
+            } else {
                 turn = (turn + 1)%2;
                 report = true;
             }

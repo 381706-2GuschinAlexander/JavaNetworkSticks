@@ -10,8 +10,6 @@ public class Client{
     private BufferedReader in;
     private boolean listener_run = true;
 
-    
-
     public void startConnection(String ip, int port) throws IOException {
         clientSocket = new Socket(ip, port);
         out = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -33,9 +31,8 @@ public class Client{
                     out.println(message);
                 } else if(resp.equals("table")){
                     String table = in.readLine();
-                    ArrayList<String> A = new ArrayList<String>(Arrays.asList(table));
+                    //ArrayList<String> t_list = new ArrayList<String>(Arrays.asList(table));
                     System.out.println(table);
-                    System.out.println(A);
                 } else if(resp.equals("quit")){
                     listener_run = false;
                 } else{
