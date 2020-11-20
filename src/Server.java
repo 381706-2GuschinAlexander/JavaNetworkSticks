@@ -2,9 +2,6 @@ import java.net.*;
 import java.util.ArrayList;
 import java.io.*;
 
-
-
-
 public class Server {
     private ServerSocket serverSocket;
     private boolean isGoing = true;
@@ -14,16 +11,23 @@ public class Server {
     private ArrayList<String> game;
     private ArrayList<String> border;
     private ArrayList<Integer> border_point;
+    private ArrayList<String> square_point;
 
+    private  int n = 0;
+    private  int m = 0;
 
-    private  int n = 3;
-    private  int m = 3;
-
-    public Server(){
+    public Server(int _n, int _m){
+        n = _n;
+        m = _m;
         game = new ArrayList<String>();
         border = new ArrayList<String>();
         border_point = new ArrayList<Integer>();
-        
+        square_point = new ArrayList<String>(n * m);
+
+        for(int i = 0; i < n * m; ++i){
+            square_point.add("-1");
+        }
+
         for(int i = 0; i < n - 1; ++i){
             border.add(i + " " + (i + 1));
             border.add(n * (m - 1) + i + " " + (n * (m - 1) + i + 1));
@@ -33,7 +37,6 @@ public class Server {
         border_point.add(n - 1);
         border_point.add(n * m  - 1);
 
-
         for(int i = 0; i < m - 1; ++i){
             border.add((i * n) + " " + (i * n + n));
             border.add((i * n + n - 1) + " " + (i * n + 2 *n -1));
@@ -42,7 +45,7 @@ public class Server {
                 border_point.add(i * n + n - 1);
             }
         }
-        System.out.println(border_point);
+        System.out.println("cols: " + n + " rows: " + m);
     }
  
     public void start(int port) throws IOException {
@@ -94,7 +97,8 @@ public class Server {
 
         private boolean isSquare(int first, int second){
             boolean placment = (first + 1 == second ? true : false);
-
+            boolean isGotPoint = false;
+            String res = "" + local_num;
             if(placment == true)
             {
                 //horizontal detection
@@ -102,9 +106,11 @@ public class Server {
                     if(game.indexOf((first - n) + " " + first) != -1 && 
                     game.indexOf((second - n) + " " + second) != -1 &&
                     game.indexOf((first - n) + " " + (second - n)) != -1){
-                        System.out.println("H-");
-                        return true;
-                        
+                        square_point.set(first - n, res);
+                        log += "   got 1 point\n";
+                        out.println("You got a point");
+                        win_point++;                        
+                        isGotPoint = true;
                     }
                 }
 
@@ -112,8 +118,11 @@ public class Server {
                     if(game.indexOf(first + " " + (first + n)) != -1 && 
                     game.indexOf(second + " " + (second + n)) != -1 &&
                     game.indexOf((first + n) + " " + (second + n)) != -1){
-                        System.out.println("H+");
-                        return true;
+                        square_point.set(first, res);
+                        log += "   got 1 point\n";
+                        out.println("You got a point");
+                        win_point++;                        
+                        isGotPoint = true;
                     }
                 }
 
@@ -123,8 +132,11 @@ public class Server {
                     if(game.indexOf((first - 1) + " " + first) != -1 && 
                     game.indexOf((second - 1)+ " " + second) != -1 &&
                     game.indexOf((first - 1) + " " + (second - 1)) != -1){
-                        System.out.println("V-");
-                        return true;
+                        square_point.set(first - 1, res);
+                        log += "   got 1 point\n";
+                        out.println("You got a point");
+                        win_point++;                        
+                        isGotPoint = true;
                     }
                 }
 
@@ -132,19 +144,21 @@ public class Server {
                     if(game.indexOf(first + " " + (first + 1)) != -1 && 
                     game.indexOf(second + " " + (second + 1)) != -1 &&
                     game.indexOf((first + 1) + " " + (second + 1)) != -1){
-                        System.out.println("V+");
-                        return true;
+                        square_point.set(first, res);
+                        log += "   got 1 point\n";
+                        out.println("You got a point");
+                        win_point++;                        
+                        isGotPoint = true;
                     }
                 }
             }
 
-            
-            return false;
+            return isGotPoint;
         }
-
 
         private void ProcedTurn(){
             if(log != "" && report == true){
+                out.println("Oponent done:");
                 out.println(log);
                 log = "";
             }
@@ -163,11 +177,14 @@ public class Server {
                 } catch (IOException e){
                     System.out.println(e);
                 }
-                System.out.println("Local num: " + local_num + " Response: " + resp);
+                //System.out.println("Local num: " + local_num + " Response: " + resp);
                 if(resp.equals("table")){
                     out.println("table");
-                    out.println("All line: "+ game);
-                    out.println("You got "+ win_point + (win_point == 1 ? " point" : " points"));
+                    out.println(n);
+                    out.println(m);
+                    out.println(game);
+                    out.println(square_point);
+                    out.println("You have "+ win_point + (win_point == 1 ? " point" : " points"));
                     continue;
                 }
                 try{
@@ -179,11 +196,11 @@ public class Server {
                 if(input_count == 2){
                     isInvalid = Validate(input_i[0], input_i[1]);
                     if (isInvalid == 2){
-                        out.println("can't parse");
+                        out.println("Can't parse");
                         input_count = 0;
                     }
                     if (isInvalid == 1){
-                        out.println("line already drawn");
+                        out.println("Line already drawn");
                         input_count = 0;
                     }
                 }  
@@ -192,22 +209,21 @@ public class Server {
             int min = Integer.min(input_i[0], input_i[1]);
             int max = Integer.max(input_i[0], input_i[1]);
             game.add(min + " " + max);
-            System.out.println(game);
+            //System.out.println(game);
 
-            log += min + " " + max + "\n";
+            log += "   placed "+ min + "-" + max + "\n";
 
             if(isSquare(min, max) == true){
-                log +=  "player " + local_num + " got 1 point\n";
-                out.println("You got a point");
+                //System.out.println(square_point);
+                
                 report = false;
-                win_point++;
-
                 if(win_point > (n - 1)*(m - 1) / 2){
                     isWinning = true;
                     isGoing = false;
                 }
 
-                if(game.size() == (n - 1) * (m - 1)){
+                if(game.size() == (2 * n * m - m - n)){
+                    System.out.println("Draw");
                     isGoing = false;
                 }
 
@@ -223,7 +239,7 @@ public class Server {
             
                 local_num = num_cl;
                 num_cl++;
-                System.out.println(local_num);
+                //System.out.println(local_num);
             try{
                 out = new PrintWriter(clientSocket.getOutputStream(), true);
                 in = new BufferedReader(
@@ -239,15 +255,14 @@ public class Server {
                 }
                 if(local_num == turn){
                     ProcedTurn();
-                } else
-                    out.println("fine");
+                }
             }
 
             if(isWinning == true){
-                out.println("you win");
+                out.println("You win");
                 out.println("quit");
             } else {
-                out.println("you lost");
+                out.println("You lost");
                 out.println("quit");
             }
 
@@ -262,8 +277,16 @@ public class Server {
     }
 
     public static void main(String[] args) throws IOException {
-            System.out.println("start");
-            Server server=new Server();
+            System.out.println("Start Server");
+            Server server;
+            if(args.length == 2){
+                try{
+                    server = new Server(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+                } catch (NumberFormatException e) {
+                    server = new Server(4,4);
+                }
+            } else
+                server = new Server(4,4);
             server.start(8080);
             server.stop();
     }
